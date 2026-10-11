@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# pre-commit — vault-lint 하드 게이트 (모든 채널·에이전트 공통 강제)
+#
+# vault-lint 가 FAIL(하드 위반: frontmatter 누락·broken link·projects 명명·
+# 신규 source orphan·신규 루트 창고·log/index 사본 등)이면 커밋을 차단한다.
+# 경고(orphan 비source·distill backlog 등)는 차단하지 않는다.
+#
+# 활성화(클론·기기마다 1회): bash scripts/install-hooks.sh
+# 정본 규칙: AI-Sessions/wiki/playbooks/domain-knowledge-pipeline.md
+ROOT="$(git rev-parse --show-toplevel)" || exit 1
+cd "$ROOT" || exit 1
+
+# [1급 보안] 시크릿 값 게이트 — 모든 커밋 경로 공통(vault-sync 우회 commit도 차단).
+# 패턴 정본: scripts/secret-patterns.sh (vault-sync.sh와 동일 소스 → 드리프트 0).
+# FAIL-CLOSED: 패턴 정본이 없거나 비면 검사가 무력화되므로 커밋을 막는다(조용한 통과=오염 금지).
+if [ ! -f scripts/secret-patterns.sh ]; then
+  echo "⛔ pre-commit: scripts/secret-patterns.sh 없음 — 시크릿 게이트 불가. 커밋 차단(fail-closed)."
+  exit 1
+fi
+. scripts/secret-patterns.sh
+if [ -z "${SECRET_RE:-}" ]; then
+  echo "⛔ pre-commit: SECRET_RE 미로드 — 시크릿 게이트 불가. 커밋 차단(fail-closed)."
+  exit 1
+fi
+if git diff --cached --text --no-color 2>/dev/null | grep -a '^+' | grep -av '^+++' | grep -aEi "$SECRET_RE" >/dev/null 2>&1; then
+  echo "⛔ pre-commit: staged diff(추가 라인)에 '시크릿 값' 패턴 감지 — 커밋 차단 (1급 보안)."
+  echo "   값을 제거(환경변수 이름+위치만 기록)한 뒤 다시 커밋하세요."
+  exit 1
+fi
+
+out="$(bash scripts/vault-lint.sh --quiet 2>&1)"; rc=$?
+if [ "$rc" -ne 0 ]; then
+  echo "$out" | grep -E '^❌|비인가 최상위|신규 source orphan' | head -20
+  echo ""
+  echo "⛔ vault-lint FAIL — 커밋 차단. 위 위반을 정리한 뒤 다시 커밋하세요."
+  echo "   전체 점검: bash scripts/vault-lint.sh"
+  exit 1
+fi
+exit 0  # 성공 시 조용히 통과

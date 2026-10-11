@@ -1,0 +1,62 @@
+# macOS
+.DS_Store
+
+# Obsidian workspace state (vault 설정 자체는 추적, 작업 상태는 제외)
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/workspaces.json
+
+# Obsidian cache
+.obsidian/cache
+.trash/
+
+# Editor 임시 파일
+*.swp
+*.swo
+*~
+
+# 게이트/스크립트 테스트 스크래치 (.__이름 규약) — 절대 커밋 금지 (vault 오염 방지)
+.__*
+
+# OS
+Thumbs.db
+
+# 개인 비공개 메모는 inbox 하위에 .private 접미사 사용
+*.private.md
+
+# 동시쓰기/규칙갱신 백업·아카이브 (로컬 복구용 보관, git 추적 불필요)
+.archive-duplicates-*/
+.rule-update-backup-*/
+
+# OMC / OMX 로컬 상태
+.omc/
+.omx/
+
+# vault-append.sh 원자적 락 디렉토리
+*.lock.d/
+
+# 시크릿 방어선 (vault엔 없어야 정상 — 방어적 차단)
+.env
+*.env
+.env.*
+*.pem
+*.key
+auth.json
+auth.json.*
+
+# Obsidian Local REST API — 로컬 API키 + 자체서명 TLS 개인키 (절대 커밋 금지)
+.obsidian/plugins/obsidian-local-rest-api/data.json
+
+# 플러그인 벤더 코드 + 테마 (대용량·머신별 재설치 — community-plugins.json이 무엇을 설치할지 기록)
+# 동기화 제외. 어떤 플러그인을 쓰는지는 community-plugins.json 하나로 충분.
+.obsidian/plugins/
+.obsidian/themes/
+
+# Claudian 플러그인 런타임 (세션 메타·설정 — 머신별, 동기화 제외)
+.claudian/
+
+# 런타임 캐시 DB (vault watcher의 임베딩/대화 인덱스 — 머신별, 동기화 제외)
+AI-Sessions/.claude-vault/
+
+# Obsidian graph view state (per-machine noise)
+.obsidian/graph.json
